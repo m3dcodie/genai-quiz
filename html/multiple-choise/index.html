@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate AWS Quizzes and Answers Application</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        .section {
+            padding: 2rem 1.5rem;
+        }
+
+        .box {
+            margin-bottom: 1.5rem;
+        }
+
+        .button.is-custom {
+            background-color: #4a5568;
+            color: #fff;
+        }
+
+        .button.is-custom:hover {
+            background-color: #2d3748;
+        }
+
+        .prompt-template {
+            white-space: pre-wrap;
+            font-family: monospace;
+            padding: 0.2rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-container {
+            margin-bottom: 1.5rem;
+        }
+
+        #quiz-section {
+            display: none;
+        }
+
+        #output-section {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="section">
+        <div class="container is-max-widescreen">
+            <h1 class="title has-text-centered">Generate an AWS Q&A Application</h1>
+            <div class="box">
+                <div class="field">
+                    <label class="label" for="apiGatewayUrl">API Gateway URL</label>
+                    <div class="control">
+                        <input class="input" type="text" id="apiGatewayUrl" placeholder="Enter API Gateway URL" aria-label="API Gateway URL input">
+                    </div>
+                </div>
+                <div class="prompt-template" id="ask-template">
+Generate a multiple choice quiz with the following format: 
+
+Quiz:
+
+Q1: Question 1 text
+a. Option 1 for Question 1
+b. Option 2 for Question 1
+c. Option 3 for Question 1
+d. Option 4 for Question 1
+
+Correct Answer: Correct option letter for Question 1.
+
+... (Repeat the same format for all questions)
+
+Base it on this context:
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <textarea class="textarea" id="ask-content" placeholder="Enter your prompt" aria-label="Prompt input" style="min-height: 200px; max-height: 400px; width: 100%; overflow-y: auto;"></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-custom" onclick="callApi('ask')" aria-label="Ask Question button">Submit</button>
+                    </div>
+                </div>
+            </div>
+            <div id="quiz-section">
+                <div class="box">
+                    <div id="quiz-container" class="quiz-container"></div>
+                </div>
+                <div class="box">
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-custom" onclick="submitQuiz()" aria-label="Submit Quiz">Submit Quiz</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="output-section">
+                <div class="box">
+                    <div class="field">
+                        <label class="label" for="output">Score</label>
+                        <div class="control">
+                            <textarea class="textarea" id="output" readonly aria-label="Output text area" style="height: 50px; width: 100%; resize: none;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="has-text-centered"><em>Please note: As with all AI-powered applications, outputs should be reviewed for accuracy and appropriateness.</em></p>
+        </div>
+    </section>
+
+    <script>
+        function callApi(templateType) {
+            const apiGatewayUrl = document.getElementById('apiGatewayUrl').value;
+            const contentId = `${templateType}-content`;
+            const content = document.getElementById(contentId).value;
+
+            // Create the request body
+            const requestBody = { content };
+
+            fetch(apiGatewayUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then((response) => response.json())
+            .then(data => {
+                const quiz = data.quiz;
+                if (quiz) {
+                    displayQuiz(quiz);
+                    document.getElementById('quiz-section').style.display = 'block';
+                } else {
+                    console.log('No quiz data received from API Gateway');
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred: " + error);
+            });
+        }
+
+        function displayQuiz(quiz) {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = '';
+            quizContainer.dataset.quiz = JSON.stringify(quiz);
+
+            for (let i = 0; i < quiz.length; i++) {
+                const question = quiz[i];
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('box');
+
+                const questionText = document.createElement('p');
+                questionText.textContent = `${i + 1}. ${question.question}`;
+                questionElement.appendChild(questionText);
+
+                const optionsContainer = document.createElement('div');
+                for (let j = 0; j < question.options.length; j++) {
+                    const option = question.options[j];
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question-${i}`;
+                    optionInput.value = String.fromCharCode(97 + j); // Convert option index to letter
+                    optionInput.id = `question-${i}-option-${String.fromCharCode(97 + j)}`; // Convert option index to letter
+
+                    const optionLabel = document.createElement('label');
+                    optionLabel.htmlFor = `question-${i}-option-${String.fromCharCode(97 + j)}`;
+                    optionLabel.textContent = option;
+                    optionLabel.style.marginLeft = '8px'; // Add margin-left to create spacing
+
+                    const optionContainer = document.createElement('div');
+                    optionContainer.appendChild(optionInput);
+                    optionContainer.appendChild(optionLabel);
+                    optionsContainer.appendChild(optionContainer);
+                }
+                questionElement.appendChild(optionsContainer);
+
+                quizContainer.appendChild(questionElement);
+            }
+        }
+
+        function submitQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            const quizElements = quizContainer.getElementsByClassName('box');
+            const userAnswers = [];
+
+            for (let i = 0; i < quizElements.length; i++) {
+                const questionElement = quizElements[i];
+                const selectedOption = questionElement.querySelector('input[type="radio"]:checked');
+                if (selectedOption) {
+                    userAnswers.push(selectedOption.value);
+                } else {
+                    userAnswers.push(null);
+                }
+            }
+
+            // Get the quiz data
+            const quizData = document.getElementById('quiz-container').dataset.quiz;
+            const quiz = JSON.parse(quizData);
+
+            // Calculate the score locally and update option backgrounds
+            let score = 0;
+            for (let i = 0; i < quiz.length; i++) {
+                const question = quiz[i];
+                const userAnswer = userAnswers[i];
+                const correctAnswerIndex = question.correct_answer_index;
+                const correctOptionLetter = String.fromCharCode(correctAnswerIndex + 97);
+
+                const optionContainers = quizElements[i].querySelector('div').children;
+                Array.from(optionContainers).forEach((optionContainer) => {
+                    const optionInput = optionContainer.querySelector('input');
+                    const optionLabel = optionContainer.querySelector('label');
+                    const optionLetter = optionInput.value;
+
+                    if (optionLetter === correctOptionLetter) {
+                        optionLabel.style.backgroundColor = userAnswer === correctOptionLetter ? 'lightgreen' : '';
+                    } else {
+                        optionLabel.style.backgroundColor = userAnswer === optionLetter ? 'lightcoral' : '';
+                    }
+                });
+
+                if (userAnswer === correctOptionLetter) {
+                    score++;
+                }
+            }
+
+            // Calculate the score percentage
+            const totalQuestions = quiz.length;
+            const scorePercentage = (score / totalQuestions) * 100;
+
+            // Display the score and percentage
+            const outputContainer = document.getElementById('output');
+            outputContainer.value = `${score} out of ${totalQuestions} (${scorePercentage.toFixed(0)}%)`;
+            document.getElementById('output-section').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
