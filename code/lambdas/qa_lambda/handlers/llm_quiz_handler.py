@@ -22,25 +22,15 @@ logger = get_logger(__name__)
 class LLMQuizHandler:
     def handle(self, request_body, context):
         content = "Generate the quiz"
-        quiz_cat_id, jquiz_data = None, None
+        quiz_category, jquiz_data = None, None
         # Get id from queryStringParameters if present
         if 'queryStringParameters' in request_body and request_body['queryStringParameters']:
-            quiz_cat_id = request_body['queryStringParameters'].get('id')
+            quiz_category = request_body['queryStringParameters'].get('quiz_category')
        
-        s3_client = boto3.client("s3")
-        bucket = os.environ.get("ARTIFACT_BUCKET")  # Replace with your bucket name
-        key = "quiz/quiz.json"   # Replace with your S3 key
-              
-        response = s3_client.get_object(Bucket=bucket, Key=key)
-        jquiz_data = json.load(response['Body'])
-
-        # Find quiz by id
-        quiz_result = next((item for item in jquiz_data if item['id'] == quiz_cat_id), None)
-               
         template = f"""
-        Below is the {quiz_result['category']} FAQ:
-
-        {LLMQuizHandler.questions_to_string(self, quiz_result['questions'])}
+        Below is the {quiz_category} FAQ:
+        Generate the quiz with 5 questions, in the below format. Try to randomize the questions
+       
     
         Quiz:
 
@@ -66,7 +56,7 @@ class LLMQuizHandler:
         """
         
         prompt = PromptBuilder.build(template, content)
-       
+        messages = []
         model_id = "apac.amazon.nova-lite-v1:0"
         if model_id.startswith("apac.amazon.nova-lite"):
             model_config = NovaLiteConfig(temperature=0.5)
@@ -80,11 +70,12 @@ class LLMQuizHandler:
             "role": "user",
             "content": [{"text": "Generate the quiz."}]
         }
-        messages = []
+        messages.append(message_1)
+        
         bedrock = BedrockClient(model_id)
         logger.info("Generating message with model %s", model_id)
-        messages.append(message_1)
-        response = bedrock.generate(system_prompts, messages, inference_config)
+        response = bedrock.generate(system_prompts, messages, inference_config)        
+        
         token_usage = response['usage']
         logger.info("Input tokens: %s", token_usage['inputTokens'])
         logger.info("Output tokens: %s", token_usage['outputTokens'])
@@ -102,7 +93,7 @@ class LLMQuizHandler:
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST'
             },
-            'body': json.dumps({'quiz': quiz})
+            'body': json.dumps(quiz)
         }
     
     # Convert questions to string with each question and options on a new line

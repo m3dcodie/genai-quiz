@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate AWS Quizzes and Answers Application</title>
+    <title>Generate Quizzes and Answers Application</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <style>
         .section {
@@ -50,36 +50,15 @@
 <body>
     <section class="section">
         <div class="container is-max-widescreen">
-            <h1 class="title has-text-centered">Generate an AWS Q&A Application</h1>
+            <h1 class="title has-text-centered">Generate Q&A Application</h1>
             <div class="box">
                 <div class="field">
-                    <label class="label" for="apiGatewayUrl">API Gateway URL</label>
+                    <label class="label" for="apiGatewayUrl">Input the topic</label>
                     <div class="control">
-                        <input class="input" type="text" id="apiGatewayUrl" placeholder="Enter API Gateway URL" aria-label="API Gateway URL input">
+                        <input class="input" type="text" id="input_topic" placeholder="Input the topic" aria-label="Input the topic">
                     </div>
                 </div>
-                <div class="prompt-template" id="ask-template">
-Generate a multiple choice quiz with the following format: 
-
-Quiz:
-
-Q1: Question 1 text
-a. Option 1 for Question 1
-b. Option 2 for Question 1
-c. Option 3 for Question 1
-d. Option 4 for Question 1
-
-Correct Answer: Correct option letter for Question 1.
-
-... (Repeat the same format for all questions)
-
-Base it on this context:
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <textarea class="textarea" id="ask-content" placeholder="Enter your prompt" aria-label="Prompt input" style="min-height: 200px; max-height: 400px; width: 100%; overflow-y: auto;"></textarea>
-                    </div>
-                </div>
+                                
                 <div class="field">
                     <div class="control">
                         <button class="button is-custom" onclick="callApi('ask')" aria-label="Ask Question button">Submit</button>
@@ -108,15 +87,21 @@ Base it on this context:
                     </div>
                 </div>
             </div>
+            <!-- Add this button inside your .box, above <div id="quiz-section"> -->
+            <div class="field">
+                <div class="control">
+                    <button class="button is-custom" onclick="loadSampleQuiz()" aria-label="Load Sample Quiz">Load Sample
+                        Quiz</button>
+                </div>
+            </div>
             <p class="has-text-centered"><em>Please note: As with all AI-powered applications, outputs should be reviewed for accuracy and appropriateness.</em></p>
         </div>
     </section>
 
     <script>
         function callApi(templateType) {
-            const apiGatewayUrl = document.getElementById('apiGatewayUrl').value;
-            const contentId = `${templateType}-content`;
-            const content = document.getElementById(contentId).value;
+            const apiGatewayUrl = "https://ls6rij40h0.execute-api.ap-southeast-2.amazonaws.com/prod/llm";            
+            const content = document.getElementById('input_topic').value;
 
             // Create the request body
             const requestBody = { content };
@@ -236,6 +221,14 @@ Base it on this context:
             const outputContainer = document.getElementById('output');
             outputContainer.value = `${score} out of ${totalQuestions} (${scorePercentage.toFixed(0)}%)`;
             document.getElementById('output-section').style.display = 'block';
+        }
+
+        function loadSampleQuiz() {
+            const sampleQuiz = { "quiz": [{ "question": "What gas do plants absorb from the atmosphere for photosynthesis?", "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], "correct_answer_index": 1 }, { "question": "Which part of a computer is considered the \\u201cbrain\\u201d?", "options": ["Hard Drive", "Motherboard", "CPU", "RAM"], "correct_answer_index": 2 }, { "question": "What is the purpose of a VPN?", "options": ["Speed up internet", "Block ads", "Secure your internet connection and hide IP", "Improve Wi-Fi range"], "correct_answer_index": 2 }] }
+            let quiz = null;
+            
+            displayQuiz(sampleQuiz.quiz);
+            document.getElementById('quiz-section').style.display = 'block';
         }
     </script>
 </body>

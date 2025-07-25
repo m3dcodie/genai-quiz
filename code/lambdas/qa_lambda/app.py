@@ -48,7 +48,7 @@ event = json.dumps({
     "path": "/llm",    
     "httpMethod": "GET",
     "queryStringParameters": {
-        "id": "e21c9f3b-9b4d-4c70-bd1f-0f871b738fb1"
+        "quiz_category": "World Knowledge & Current Affairs"
     },
     "headers": {
         "Accept": "*/*",
