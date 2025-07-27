@@ -1,101 +1,85 @@
 import os
 from sys import path
 import json
-import boto3
-import tempfile
 
 path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libraries')))
 from logging_utils import get_logger
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
-
 path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../domain/models/faq_template')))
-from template import sagemaker_faqs_template, bedrock_faqs_template, bedrock_rag_faqs_template
+from template import faqs_template
 
 path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../domain')))
 from bedrock_client import BedrockClient
 from quiz_parser import QuizParser
 from prompt_builder import PromptBuilder
-from model_config import NovaLiteConfig, TitanConfig, BaseModelConfig
+from model_config import NovaLiteConfig
 
 logger = get_logger(__name__)
 
 class LLMQuizHandler:
-    def handle(self, request_body, context):
+    def handle(self, request_body: dict, context) -> dict:
+        """
+        Process the incoming request and generate a quiz.
+
+        Args:
+            request_body (dict): The request payload.
+            context: Lambda context object.
+
+        Returns:
+            dict: API Gateway-compatible response.
+        """
         content = "Generate the quiz"
         quiz_category, jquiz_data = None, None
-        # Get id from queryStringParameters if present
-        if 'queryStringParameters' in request_body and request_body['queryStringParameters']:
-            quiz_category = request_body['queryStringParameters'].get('quiz_category')
+        quiz_category = request_body.get('quiz_category')
        
-        template = f"""
-        Below is the {quiz_category} FAQ:
-        Generate the quiz with 5 questions, in the below format. Try to randomize the questions
-       
-    
-        Quiz:
-
-        Q1: <Question 1 text>
-        a. <Option 1 for Question 1>
-        b. <Option 2 for Question 1>
-        c. <Option 3 for Question 1>
-        d. <Option 4 for Question 1>
-
-        Correct Answer: <Correct option letter for Question 1>.
-
-        Q2: <Question 2 text>
-        a. <Option 1 for Question 2>
-        b. <Option 2 for Question 2>
-        c. <Option 3 for Question 2>
-        d. <Option 4 for Question 2>
-
-        Correct Answer: <Correct option letter for Question 2>.
-
-        ... (Repeat the same format for all questions)
-    
-        Strickly follow the format above.
-        """
+        template = faqs_template(quiz_category)
         
         prompt = PromptBuilder.build(template, content)
         messages = []
         model_id = "apac.amazon.nova-lite-v1:0"
-        if model_id.startswith("apac.amazon.nova-lite"):
-            model_config = NovaLiteConfig(temperature=0.5)
-        elif model_id.startswith("amazon.titan"):
-            model_config = TitanConfig(temperature=0.5, top_p=0.95)
-        else:
-            model_config = BaseModelConfig(temperature=0.5)
+        model_config = NovaLiteConfig(temperature=0.5)        
         inference_config = model_config.to_inference_config()
         system_prompts = [{"text": prompt}]
         message_1 = {
             "role": "user",
-            "content": [{"text": "Generate the quiz."}]
+            "content": [{"text": content}]
         }
         messages.append(message_1)
-        
-        bedrock = BedrockClient(model_id)
-        logger.info("Generating message with model %s", model_id)
-        response = bedrock.generate(system_prompts, messages, inference_config)        
-        
-        token_usage = response['usage']
-        logger.info("Input tokens: %s", token_usage['inputTokens'])
-        logger.info("Output tokens: %s", token_usage['outputTokens'])
-        logger.info("Total tokens: %s", token_usage['totalTokens'])
-        logger.info("Stop reason: %s", response['stopReason'])
-        logger.info("metrics latencyMs: %s Ms", response['metrics']['latencyMs'])
-        output_message = response['output']['message']
-        messages.append(output_message)
-        result = output_message["content"][0]['text']
-        quiz = QuizParser.parse(result)
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST'
-            },
-            'body': json.dumps(quiz)
-        }
-    
+        try:
+
+            bedrock = BedrockClient(model_id)
+            logger.info("Generating message with model %s", model_id)
+            response = bedrock.generate(system_prompts, messages, inference_config)        
+            
+            token_usage = response['usage']
+            logger.info("Input tokens: %s", token_usage['inputTokens'])
+            logger.info("Output tokens: %s", token_usage['outputTokens'])
+            logger.info("Total tokens: %s", token_usage['totalTokens'])
+            logger.info("Stop reason: %s", response['stopReason'])
+            logger.info("metrics latencyMs: %s Ms", response['metrics']['latencyMs'])
+            output_message = response['output']['message']
+            messages.append(output_message)
+            result = output_message["content"][0]['text']
+            quiz = QuizParser.parse(result)
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST'
+                },
+                'body': json.dumps(quiz)
+            }
+        except Exception as e:
+            logger.error("Quiz generation failed: %s", str(e), exc_info=True)
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST'
+                },
+                'body': json.dumps({'error': str(e)})
+            }
     # Convert questions to string with each question and options on a new line
     def questions_to_string(self, questions):
         lines = []
