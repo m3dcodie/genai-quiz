@@ -7,42 +7,84 @@
     <title>Generate Quizzes and Answers Application</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <style>
+        :root {
+            --fb-blue: #1877f2;
+            --fb-dark-blue: #145db2;
+            --fb-light-blue: #e7f3ff;
+            --fb-gray: #f0f2f5;
+            --fb-text: #050505;
+            --fb-border: #ccd0d5;
+        }
+        body {
+            background: var(--fb-gray);
+            color: var(--fb-text);
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
         .section {
             padding: 2rem 1.5rem;
         }
-
+        .container.is-max-widescreen {
+            max-width: 600px;
+            margin: 0 auto;
+        }
         .box {
             margin-bottom: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--fb-border);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(24,119,242,0.04);
         }
-
         .button.is-custom {
-            background-color: #4a5568;
+            background-color: var(--fb-blue);
             color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: background 0.2s;
         }
-
         .button.is-custom:hover {
-            background-color: #2d3748;
+            background-color: var(--fb-dark-blue);
         }
-
+        .input, .textarea {
+            border-radius: 6px;
+            border: 1px solid var(--fb-border);
+        }
         .prompt-template {
             white-space: pre-wrap;
             font-family: monospace;
             padding: 0.2rem;
-            background-color: #f5f5f5;
+            background-color: var(--fb-light-blue);
             border-radius: 4px;
             margin-bottom: 1rem;
         }
-
         .quiz-container {
             margin-bottom: 1.5rem;
         }
-
         #quiz-section {
             display: none;
         }
-
         #output-section {
             display: none;
+        }
+        .title.has-text-centered {
+            color: var(--fb-blue);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .field label.label {
+            color: var(--fb-dark-blue);
+            font-weight: 600;
+        }
+        .box .box {
+            background: var(--fb-light-blue);
+            border: 1px solid var(--fb-border);
+        }
+        .button.is-custom:focus {
+            outline: 2px solid var(--fb-blue);
+        }
+        .has-text-centered em {
+            color: #888;
         }
     </style>
 </head>
@@ -55,7 +97,8 @@
                 <div class="field">
                     <label class="label" for="apiGatewayUrl">Input the topic</label>
                     <div class="control">
-                        <input class="input" type="text" id="input_topic" placeholder="Input the topic" aria-label="Input the topic">
+                        <input class="input" type="text" id="input_topic" placeholder="Input the topic" aria-label="Input the topic" maxlength="100" oninput="updateCharCount()">
+                        <p id="char-count" class="help is-info" style="margin-top: 4px; font-size: 0.95em;">Max 100 characters.</p>
                     </div>
                 </div>
                                 
@@ -87,18 +130,25 @@
                     </div>
                 </div>
             </div>
-            <!-- Add this button inside your .box, above <div id="quiz-section"> -->
-            <div class="field">
-                <div class="control">
-                    <button class="button is-custom" onclick="loadSampleQuiz()" aria-label="Load Sample Quiz">Load Sample
-                        Quiz</button>
-                </div>
-            </div>
+           
             <p class="has-text-centered"><em>Please note: As with all AI-powered applications, outputs should be reviewed for accuracy and appropriateness.</em></p>
         </div>
     </section>
 
     <script>
+
+        function updateCharCount() {
+            const input = document.getElementById('input_topic');
+            const charCount = document.getElementById('char-count');
+            const maxLen = 100;
+            const len = input.value.length;
+            charCount.textContent = `Max 100 characters. (${len}/${maxLen})`;
+            if (len >= maxLen) {
+                charCount.classList.add('has-text-danger');
+            } else {
+                charCount.classList.remove('has-text-danger');
+            }
+        }
         function callApi(templateType) {
             const apiGatewayUrl = "https://ls6rij40h0.execute-api.ap-southeast-2.amazonaws.com/prod/llm";            
             const content = document.getElementById('input_topic').value;
@@ -223,13 +273,7 @@
             document.getElementById('output-section').style.display = 'block';
         }
 
-        function loadSampleQuiz() {
-            const sampleQuiz = { "quiz": [{ "question": "What gas do plants absorb from the atmosphere for photosynthesis?", "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], "correct_answer_index": 1 }, { "question": "Which part of a computer is considered the \\u201cbrain\\u201d?", "options": ["Hard Drive", "Motherboard", "CPU", "RAM"], "correct_answer_index": 2 }, { "question": "What is the purpose of a VPN?", "options": ["Speed up internet", "Block ads", "Secure your internet connection and hide IP", "Improve Wi-Fi range"], "correct_answer_index": 2 }] }
-            let quiz = null;
-            
-            displayQuiz(sampleQuiz.quiz);
-            document.getElementById('quiz-section').style.display = 'block';
-        }
+        
     </script>
 </body>
 

@@ -6,6 +6,8 @@
 
 GenAI Quiz is a serverless application that generates FAQs and quizzes for any topic provided by the user. Leveraging AWS Bedrock's LLM capabilities, it helps users test and expand their knowledge interactively on their favorite subjects.
 
+![UI](genaiinterface.png)
+
 ## Features
 
 - Generate quizzes and FAQs for any topic
@@ -35,6 +37,8 @@ The solution is built using AWS Lambda, API Gateway, S3, CloudFront, and Bedrock
 
 ## Deployment
 
+NOTE: This solution is only for development use, for production we need to tighten security. e-g Firewals, IP address restriction or some authorizers.
+
 1. **Package Lambda**: Use the provided script to zip the Lambda code:
    ```sh
    ./create_deployment.sh
@@ -46,7 +50,7 @@ The solution is built using AWS Lambda, API Gateway, S3, CloudFront, and Bedrock
    terraform plan
    terraform apply
    ```
-4. Update the APIGateway URL in /html/multiple-choise/index.html (output via terraform). Then upload to S3 bucket.
+4. Update the APIGateway URL in /html/multiple-choise/index.html [apiGatewayUrl](output via terraform). Then upload to S3 bucket.
 
 ## Usage
 

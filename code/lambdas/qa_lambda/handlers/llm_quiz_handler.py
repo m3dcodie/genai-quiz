@@ -30,7 +30,16 @@ class LLMQuizHandler:
         content = "Generate the quiz"
         quiz_category, jquiz_data = None, None
         quiz_category = request_body.get('quiz_category')
-       
+        if quiz_category and len(quiz_category) > 100:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST'
+                },
+                'body': json.dumps({'error': 'quiz_category must be 100 characters or fewer.'})
+            }
         template = faqs_template(quiz_category)
         
         prompt = PromptBuilder.build(template, content)
