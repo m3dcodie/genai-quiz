@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 module "llm_lambda" {
   source             = "./modules/lambda"
   function_name      = "qa_lambda"
@@ -9,9 +11,9 @@ module "llm_lambda" {
   memory_size        = 128
 
   environment_variables = {
-    TEMPLATE_FUNCTION = "sagemaker_faqs_template"
-    ARTIFACT_BUCKET   = "mst-artifact-bucket"
+    ARTIFACT_BUCKET = var.artifact_s3_bucket
   }
+
 
   additional_policies = [
     {
@@ -20,7 +22,7 @@ module "llm_lambda" {
         "bedrock:InvokeModel"
       ]
       Resource = [
-        "arn:aws:bedrock:ap-southeast-2:235494807105:model*"
+        "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:model*"
       ]
     },
     {
@@ -30,8 +32,8 @@ module "llm_lambda" {
         "s3:ListBucket"
       ]
       Resource = [
-        "arn:aws:s3:::mst-artifact-bucket",
-        "arn:aws:s3:::mst-artifact-bucket/*"
+        "arn:aws:s3:::${var.artifact_s3_bucket}",
+        "arn:aws:s3:::${var.artifact_s3_bucket}/*"
       ]
     }
   ]
@@ -44,8 +46,3 @@ resource "aws_lambda_permission" "allow_bedrock_invoke" {
   function_name = module.llm_lambda.function_name
   principal     = "bedrock.amazonaws.com"
 }
-
-
-#filename      = "code/llm/llm_deployment_package.zip"
-#filename      = "code/prompt/prompt_deployment_package.zip"
-#filename      = "code/rag/rag_deployment_package.zip"

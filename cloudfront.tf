@@ -76,3 +76,9 @@ resource "aws_s3_bucket_policy" "s3_policy" {
 resource "aws_cloudfront_origin_access_identity" "my_oai" {
   comment = "Access Identity for S3 bucket"
 }
+
+# Output the Cloudfront URL
+output "cloudfront_url" {
+  value       = aws_cloudfront_distribution.my_distribution.domain_name
+  description = "The domain name of the CloudFront distribution."
+}

@@ -1,12 +1,18 @@
 resource "aws_s3_bucket" "s3_static_site" {
-  bucket = "genai-qa-static-site"
-  acl    = "private"
+  bucket = var.artifact_s3_bucket
 
   tags = {
-    Name        = "GenAI QA Static Site"
-    Environment = "dev"
+    Name = "GenAI QA Static Site"
   }
 }
+
+resource "aws_s3_object" "quiz_html" {
+  bucket       = var.artifact_s3_bucket
+  key          = "multiple-choise/index.html"
+  source       = "${path.module}/html/multiple-choise/index.html"
+  content_type = "text/html"
+}
+
 resource "aws_s3_bucket_policy" "cloudfront_access" {
   bucket = aws_s3_bucket.s3_static_site.id
 
@@ -33,4 +39,4 @@ resource "aws_s3_bucket_policy" "cloudfront_access" {
   })
 }
 
-data "aws_caller_identity" "current" {}
+
