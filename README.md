@@ -63,6 +63,8 @@ GitHub: [https://github.com/m3dcodie/genai-quiz](https://github.com/m3dcodie/gen
 CI/CD
 Lambda deployement improvement
 Can restrict APIGateway to only call via Cloudfront. or make APIgateway private and use VPC endpoints for access.
+Remote terraform state
+WAF with AWS managed rules
 
 ## License
 
