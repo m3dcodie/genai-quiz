@@ -60,6 +60,6 @@ event = json.dumps({
     "isBase64Encoded": False}
 )
 
-response = lambda_handler(event, None)
-print("Response:")
-print(response)
+#response = lambda_handler(event, None)
+#print("Response:")
+#print(response)
