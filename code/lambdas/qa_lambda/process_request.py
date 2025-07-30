@@ -1,11 +1,7 @@
-import os
-from botocore.exceptions import ClientError
-from sys import path
 
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './domain/libraries')))
-from logging_utils import get_logger
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './handlers')))
-from llm_quiz_handler import LLMQuizHandler
+from botocore.exceptions import ClientError
+from domain.libraries.logging_utils import get_logger
+from lambdas.qa_lambda.handlers.llm_quiz_handler import LLMQuizHandler
 
 # Set up logging
 logger = get_logger(__name__)

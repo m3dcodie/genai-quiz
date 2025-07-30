@@ -1,12 +1,6 @@
 import json
-
 from unittest.mock import patch
-
-import os
-from sys import path
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from app import lambda_handler
+from lambdas.qa_lambda.app import lambda_handler
 
 def test_lambda_handler_success():
     event = json.dumps({
@@ -21,7 +15,7 @@ def test_lambda_handler_success():
         },
         "isBase64Encoded": False
     })
-    with patch("app.process_request") as mock_process_request:
+    with patch("lambdas.qa_lambda.app.process_request") as mock_process_request:
         mock_process_request.return_value = {
             "statusCode": 200,
             "headers": {
@@ -52,7 +46,7 @@ def test_lambda_handler_missing_quiz_category():
         "headers": {"Accept": "*/*"},
         "isBase64Encoded": False
     })
-    with patch("app.process_request") as mock_process_request:
+    with patch("lambdas.qa_lambda.app.process_request") as mock_process_request:
         mock_process_request.return_value = {
             "statusCode": 200,
             "headers": {},
@@ -75,7 +69,7 @@ def test_lambda_handler_quiz_category_too_long():
         "headers": {"Accept": "*/*"},
         "isBase64Encoded": False
     })
-    with patch("app.process_request") as mock_process_request:
+    with patch("lambdas.qa_lambda.app.process_request") as mock_process_request:
         # Should not be called, but patch anyway
         mock_process_request.return_value = {
             "statusCode": 400,
@@ -99,7 +93,8 @@ def test_lambda_handler_process_request_exception():
         "headers": {"Accept": "*/*"},
         "isBase64Encoded": False
     })
-    with patch("app.process_request", side_effect=Exception("Simulated failure")):
+    
+    with patch("lambdas.qa_lambda.app.process_request", side_effect=Exception("Simulated failure")):
         response = lambda_handler(event, None)
     assert isinstance(response, dict)
     assert response["statusCode"] == 500

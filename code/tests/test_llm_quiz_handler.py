@@ -1,11 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-import os
-from sys import path
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from llm_quiz_handler import LLMQuizHandler
+from lambdas.qa_lambda.handlers.llm_quiz_handler import LLMQuizHandler
 
 def test_handle_success():
     mock_bedrock = MagicMock()
@@ -15,8 +11,8 @@ def test_handle_success():
         'metrics': {'latencyMs': 100},
         'output': {'message': {'content': [{'text': 'Q1: ...\nCorrect Answer: a.'}]}}
     }
-    with patch('handlers.llm_quiz_handler.BedrockClient', return_value=mock_bedrock), \
-         patch('handlers.llm_quiz_handler.QuizParser.parse', return_value={"quiz": []}):
+    with patch('lambdas.qa_lambda.handlers.llm_quiz_handler.BedrockClient', return_value=mock_bedrock), \
+         patch('lambdas.qa_lambda.handlers.llm_quiz_handler.QuizParser.parse', return_value={"quiz": []}):
         handler = LLMQuizHandler()
         request_body = {'quiz_category': 'Science'}
         context = None
@@ -35,7 +31,7 @@ def test_handle_quiz_category_too_long():
 
 
 def test_handle_bedrock_exception():
-    with patch('handlers.llm_quiz_handler.BedrockClient') as mock_bedrock:
+    with patch('lambdas.qa_lambda.handlers.llm_quiz_handler.BedrockClient') as mock_bedrock:
         instance = mock_bedrock.return_value
         instance.generate.side_effect = Exception('Bedrock error')
         handler = LLMQuizHandler()
@@ -55,8 +51,8 @@ def test_handle_missing_quiz_category():
         'metrics': {'latencyMs': 100},
         'output': {'message': {'content': [{'text': 'Q1: ...\nCorrect Answer: a.'}]}}
     }
-    with patch('handlers.llm_quiz_handler.BedrockClient', return_value=mock_bedrock), \
-         patch('handlers.llm_quiz_handler.QuizParser.parse', return_value={"quiz": []}):
+    with patch('lambdas.qa_lambda.handlers.llm_quiz_handler.BedrockClient', return_value=mock_bedrock), \
+         patch('lambdas.qa_lambda.handlers.llm_quiz_handler.QuizParser.parse', return_value={"quiz": []}):
         handler = LLMQuizHandler()
         request_body = {}  # No quiz_category
         context = None

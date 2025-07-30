@@ -1,17 +1,11 @@
-import os
-from sys import path
+
 import json
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../libraries')))
-from logging_utils import get_logger
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../domain/models/faq_template')))
-from template import faqs_template
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../domain')))
-from bedrock_client import BedrockClient
-from quiz_parser import QuizParser
-from prompt_builder import PromptBuilder
-from model_config import NovaLiteConfig
+from domain.libraries.logging_utils import get_logger
+from domain.models.faq_template.template import faqs_template
+from domain.bedrock_client import BedrockClient
+from domain.quiz_parser import QuizParser
+from domain.prompt_builder import PromptBuilder
+from domain.model_config import NovaLiteConfig
 
 logger = get_logger(__name__)
 

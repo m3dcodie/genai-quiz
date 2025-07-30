@@ -1,9 +1,5 @@
 import boto3
-import os
-from sys import path
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './models')))
-from coverse_api import generate_conversation
+from domain.models.coverse_api import generate_conversation
 
 class BedrockClient:
     def __init__(self, model_id):

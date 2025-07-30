@@ -1,11 +1,8 @@
+
 import json
 import traceback
-from sys import path
-import os
-from process_request import process_request 
-
-path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './domain/libraries')))
-from logging_utils import get_logger
+from domain.libraries.logging_utils import get_logger
+from lambdas.qa_lambda.process_request import process_request
 
 # Set up logging
 logger = get_logger(__name__)
@@ -60,6 +57,6 @@ event = json.dumps({
     "isBase64Encoded": False}
 )
 
-#response = lambda_handler(event, None)
-#print("Response:")
-#print(response)
+response = lambda_handler(event, None)
+print("Response:")
+print(response)
