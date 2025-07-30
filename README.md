@@ -58,6 +58,22 @@ NOTE: This solution is only for development use, for production we need to tight
 2. Enter your topic and generate a quiz.
 3. Answer the questions and check your results.
 
+## Running locally
+
+Assume aws role, that has access to invoke lambda
+install via
+
+```sh
+cd /code/lambdas/qa_lambda
+export PYTHONPATH=/code/lambdas/qa_lambda/python_packages:$PYTHONPATH
+pip install package_name --target python_packages
+
+create soft link
+ln -s ./code/domain ./code/lambdas/qa_lambda/domain
+
+PYTHONPATH=code python3 ./code/lambdas/qa_lambda/app.py
+```
+
 ## Repository
 
 GitHub: [https://github.com/m3dcodie/genai-quiz](https://github.com/m3dcodie/genai-quiz)
