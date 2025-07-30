@@ -60,6 +60,7 @@ NOTE: This solution is only for development use, for production we need to tight
 
 ## Running locally
 
+![Running local](running-locally.png)
 Assume aws role, that has access to invoke lambda
 install via
 
@@ -80,11 +81,15 @@ GitHub: [https://github.com/m3dcodie/genai-quiz](https://github.com/m3dcodie/gen
 
 ## Roadmap
 
-CI/CD
-Lambda deployement improvement
-Can restrict APIGateway to only call via Cloudfront. or make APIgateway private and use VPC endpoints for access.
-Remote terraform state
-WAF with AWS managed rules
+- CI/CD
+- Lambda deployment improvement
+- Restrict API Gateway to only call via CloudFront, or make API Gateway private and use VPC endpoints for access.
+- Remote terraform state
+- WAF with AWS managed rules
+
+- User's can register their interest in topics, generate quiz on a certain frequency, daily, weekly etc.
+- User's can share quiz with other users.
+- It can be a base for schools to take quiz for each class.
 
 ## License
 
