@@ -1,7 +1,7 @@
 
 from botocore.exceptions import ClientError
 from domain.libraries.logging_utils import get_logger
-from lambdas.qa_lambda.handlers.llm_quiz_handler import LLMQuizHandler
+from handlers.llm_quiz_handler import LLMQuizHandler
 
 # Set up logging
 logger = get_logger(__name__)

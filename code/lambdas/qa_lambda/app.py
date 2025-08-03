@@ -2,7 +2,7 @@
 import json
 import traceback
 from domain.libraries.logging_utils import get_logger
-from lambdas.qa_lambda.process_request import process_request
+from process_request import process_request
 
 # Set up logging
 logger = get_logger(__name__)
