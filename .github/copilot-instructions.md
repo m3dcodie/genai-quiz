@@ -50,4 +50,4 @@ GenAI Quiz is a serverless application that uses Generative AI to generate FAQs 
 
 ## Git
 
-- Git commit messsage: Be extremely detaild with the file changes and the reason for the change. Add emojis as much as you can.
+- Git commit messsage: medium detail with the file changes and the reason for the change. Add emojis as much as you can.

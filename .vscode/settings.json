@@ -1,0 +1,14 @@
+{
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "medium detail with the file changes and the reason for the change. Add emojis as much as you can."
+        }
+    ],
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "github.copilot.chat.reviewSelection.instructions": [
+        {
+            "text": "Each class, function should have comments. No print statements, flag larger files > 1000 lines. check for unit tests if possible"
+        }
+    ],
+    
+}
